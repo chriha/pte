@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .bg-bug {
+            background-color: #a8b820;
+        }
+
+        .bg-dark {
+            background-color: #705848;
+        }
+
+        .bg-dragon {
+            background-color: #7038f8;
+        }
+
+        .bg-electric {
+            background-color: #f8d030;
+        }
+
+        .bg-fairy {
+            background-color: #ee99ac;
+        }
+
+        .bg-fighting {
+            background-color: #c03028;
+        }
+
+        .bg-fire {
+            background-color: #f08030;
+        }
+
+        .bg-flying {
+            background-color: #a890f0;
+        }
+
+        .bg-ghost {
+            background-color: #705898;
+        }
+
+        .bg-grass {
+            background-color: #78c850;
+        }
+
+        .bg-ground {
+            background-color: #e0c068;
+        }
+
+        .bg-ice {
+            background-color: #98d8d8;
+        }
+
+        .bg-normal {
+            background-color: #a8a878;
+        }
+
+        .bg-poison {
+            background-color: #a040a0;
+        }
+
+        .bg-psychic {
+            background-color: #f85888;
+        }
+
+        .bg-rock {
+            background-color: #b8a038;
+        }
+
+        .bg-steel {
+            background-color: #b8b8d0;
+        }
+
+        .bg-water {
+            background-color: #6890f0;
+        }
+    </style>
+    <title>Pokémon Type Effectiveness</title>
+</head>
+<body class="bg-gray-900 font-sans antialiased text-white">
+<div x-data="{
+    types: {},
+    selectedType: '',
+    selectedMode: 'attack',
+
+    async loadTypes() {
+        const response = await fetch('/assets/types.json')
+        this.types = await response.json()
+    },
+
+    effectivenessOf(type, defType) {
+        return this.types[type][defType]
+    },
+
+    getEffectiveness() {
+        const effectiveness = this.types[this.selectedType][this.selectedMode]
+        return {
+            super: effectiveness.super_effective,
+            normal: effectiveness.normal_effectiveness,
+            notVery: effectiveness.not_very_effective,
+            no: effectiveness.no_effect
+        }
+    }
+}"
+x-init="loadTypes()">
+
+    <div class="p-4 flex flex-col">
+        <h1 class="text-2xl text-white font-bold mb-4">Pokémon Type Effectiveness</h1>
+
+        <div class="max-w-2xl md:max-w-4xl mx-auto grid grid-cols-6 md:grid-cols-9 gap-4">
+
+            <template x-for="(type, index) in types" :key="'types-' + index">
+                <div class="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 opacity-80 cursor-pointer"
+                     :class="{'bg-gray-700 ring-1 ring-blue-500 opacity-100': selectedType === index}"
+                     x-tooltip="index"
+                    @click="selectedType = index">
+                    <img class="" :src="'/assets/images/types/' + index + '.png'">
+                </div>
+            </template>
+
+        </div>
+
+        <div x-data="{ expanded: true }" class="max-w-6xl mx-auto mt-8">
+            <button @click="expanded = ! expanded" class="text-gray-500">Toggle Table</button>
+
+            <div x-show="expanded" x-collapse>
+                <div>
+                    <table class="table-fixed w-full text-sm mt-4">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <template x-for="(type, index) in types" :key="'types-table-header-' + index">
+                                <th x-text="index"
+                                    class="px-2 py-2 capitalize text-ellipsis overflow-hidden text-center"
+                                    style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                                    :class="'bg-' + index"></th>
+                            </template>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <template x-for="(type, index) in types" :key="'types-table-' + index">
+                            <tr class="group">
+                                <td x-text="index"
+                                    class="px-2 py-2 capitalize text-ellipsis overflow-hidden group-hover:bg-gray-700"
+                                    style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                                    :class="'bg-' + index"></td>
+                                <template x-for="(defType, defIndex) in types" :key="'types-table-' + defIndex">
+                                    <td x-data="{ effectiveness: effectivenessOf(index, defIndex) }"
+                                        class="px-2 py-2 group-hover:bg-gray-700 text-center"
+                                        style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);">
+
+                                        <span x-show="effectiveness !== 1"
+                                              x-text="effectiveness"
+                                              :class="{'text-red-500': effectiveness === 0, 'text-yellow-500': effectiveness === 0.5, 'text-green-500 font-bold': effectiveness > 1}"></span>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-16">
+            <p>Select mode:</p>
+
+            <button class="bg-blue-900 hover:bg-blue-950 hover:text-white mr-2 px-4 py-2 text-gray-100 rounded text-sm tracking-wider uppercase cursor-pointer"
+                    :class="{'opacity-50': selectedMode !== 'attack'}"
+                    @click="selectedMode = 'attack'">
+                Attack
+            </button>
+            <button class="bg-red-900 hover:bg-red-950 hover:text-white px-4 py-2 rounded text-gray-100 text-sm uppercase cursor-pointer"
+                    :class="{'opacity-50': selectedMode !== 'defense'}"
+                    @click="selectedMode = 'defense'">
+                Defense
+            </button>
+        </div>
+
+<!--        <div class="mt-4 text-lg text-white" x-text="getEffectiveness().super"></div>-->
+    </div>
+</div>
+</body>
+</html>
