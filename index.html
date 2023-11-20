@@ -5,61 +5,62 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script type="text/javascript">
-        Object.filter = (obj, predicate) =>
-            Object.fromEntries(Object.entries(obj).filter(predicate));
+        Object.filter = function(obj, predicate) {
+            return Object.fromEntries(Object.entries(obj).filter(predicate));
+        };
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         .bg-bug {
-            background-color: #a8b820;
+            background-color: #779f2f;
         }
 
         .bg-dark {
-            background-color: #705848;
+            background-color: #4c4759;
         }
 
         .bg-dragon {
-            background-color: #7038f8;
+            background-color: #105ba5;
         }
 
         .bg-electric {
-            background-color: #f8d030;
+            background-color: #c6ad3b;
         }
 
         .bg-fairy {
-            background-color: #ee99ac;
+            background-color: #c077c0;
         }
 
         .bg-fighting {
-            background-color: #c03028;
+            background-color: #a9395c;
         }
 
         .bg-fire {
-            background-color: #f08030;
+            background-color: #cf834c;
         }
 
         .bg-flying {
-            background-color: #a890f0;
+            background-color: #768bb9;
         }
 
         .bg-ghost {
-            background-color: #705898;
+            background-color: #455991;
         }
 
         .bg-grass {
-            background-color: #78c850;
+            background-color: #529b51;
         }
 
         .bg-ground {
-            background-color: #e0c068;
+            background-color: #b16441;
         }
 
         .bg-ice {
-            background-color: #98d8d8;
+            background-color: #60aaa1;
         }
 
         .bg-normal {
-            background-color: #a8a878;
+            background-color: #767f89;
         }
 
         .bg-poison {
@@ -67,19 +68,19 @@
         }
 
         .bg-psychic {
-            background-color: #f85888;
+            background-color: #ca6067;
         }
 
         .bg-rock {
-            background-color: #b8a038;
+            background-color: #a29877;
         }
 
         .bg-steel {
-            background-color: #b8b8d0;
+            background-color: #4b7789;
         }
 
         .bg-water {
-            background-color: #6890f0;
+            background-color: #4177b3;
         }
     </style>
     <title>Pokémon Type Effectiveness</title>
@@ -87,108 +88,149 @@
 <body class="bg-gray-900 font-sans antialiased text-white">
 <div x-data="{
     types: {},
-    selectedType: '',
+    selectedType: 'bug',
+    selectedTypes: ['bug', 'dark'],
+
+    selectType(type) {
+        if (this.selectedTypes.includes(type)) {
+            this.selectedTypes = this.selectedTypes.filter(t => t !== type)
+        } else {
+            if (this.selectedTypes.length === 2) {
+                this.selectedTypes.shift()
+            }
+
+            this.selectedTypes.push(type)
+        }
+    },
 
     async loadTypes() {
         const response = await fetch('/assets/types.json')
         this.types = await response.json()
     },
 
+    exists(type) {
+        if (Array.isArray(type)) {
+            return type.every(t => this.exists(t))
+        }
+
+        return !! this.types[type]
+    },
+
     effectivenessOf(type, defType) {
         return this.types[type][defType]
     },
 
-    effectivenessFor(mode) {
-    console.log(Object.filter(this.types, (k, v) => v === 2));
-        if (! this.selectedType) {
-            return {super: [], no: [], notVery: [], normal: []}
+    effectivenessesFor(mode) {
+        if (! this.selectedTypes.length || ! this.exists(this.selectedTypes)) {
+            return {super: [], ineffective: [], notVery: [], normal: []}
         }
 
-        let types = Object.entries(this.types);
+        let effectivenesses = Object.filter(this.types, ([k, v]) => this.selectedTypes.includes(k))
+
+        console.log(effectivenesses)
+
+        let list = {};
+
+        for (const [key, value] of Object.entries(effectivenesses)) {
+            for (const [k, v] of Object.entries(value)) {
+                let multiplier = 1;
+
+                if (list[k] === undefined) {
+                    list[k] = v;
+                } else {
+                    list[k] = Number(list[k] * v).toFixed(2);
+                }
+            }
+        }
+
+        let _super = Object.filter(list, ([k, v]) => v >= 1.6);
+        let _notVery = Object.filter(list, ([k, v]) => v < 1 && v >= 0.63);
+        let _ineffective = Object.filter(list, ([k, v]) => v < 0.63);
 
         if (mode === 'attack') {
             return {
-                super: Object.filter(this.types[this.selectedType], ([k, v]) => v === 2),
-                normal: Object.filter(this.types[this.selectedType], ([k, v]) => v === 1),
-                notVery: Object.filter(this.types[this.selectedType], ([k, v]) => v === 0.5),
-                no: Object.filter(this.types[this.selectedType], ([k, v]) => v === 0)
+                super: _super,
+                notVery: _notVery,
+                ineffective: _ineffective
+            };
+        }
 
-            }
+        return {
+            ineffective: _ineffective,
+            notVery: _notVery,
+            super: _super
         }
     },
 }"
 x-init="loadTypes()">
 
     <div class="p-4 flex flex-col">
-        <h1 class="text-2xl text-white font-bold mb-4">Pokémon Type Effectiveness</h1>
+        <h1 class="font-bold mb-8 text-2xl text-center text-white">Pokémon Type Effectiveness</h1>
 
         <div class="max-w-2xl md:max-w-4xl mx-auto grid grid-cols-6 md:grid-cols-9 gap-4">
-
             <template x-for="(type, index) in types" :key="'types-' + index">
                 <div class="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 opacity-80 cursor-pointer relative"
-                     :class="{'bg-gray-700 ring-1 ring-blue-500 opacity-100': selectedType === index}"
+                     :class="{'bg-gray-700 ring-1 ring-blue-500 opacity-100': selectedTypes.includes(index)}"
                      x-tooltip="index"
-                    @click="selectedType = index">
-                    <img class="" :src="'/assets/images/types/' + index + '.png'">
+                    @click="selectType(index)">
+                    <img :src="'/assets/images/types/' + index + '.png'">
                     <span x-text="index" :class="'bg-' + index"
                           style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                          class="absolute pb-0.5 block bottom-0 font-semibold left-0 mt-2 mx-auto rounded-b-lg text-center text-sm w-full"></span>
+                          class="absolute pb-0.5 block bottom-0 font-semibold left-0 mt-2 mx-auto rounded-b-lg text-center text-xs md:text-sm w-full"></span>
                 </div>
             </template>
-
         </div>
 
-        <div x-if="selectedType" class="grid grid-cols-2 max-w-2xl md:max-w-4xl mt-8 mx-auto w-full">
+        <div class="max-w-2xl md:max-w-4xl mt-8 mx-auto w-full">
             <div>
-                <h2 class="font-bold text-center">Attack</h2>
-                <div>
-                    <div class="mt-2">
-                        Super Effective:
-                        <template x-for="(type, index) in effectivenessFor('attack', selectedType).super">
-                            <span class="rounded-md px-2 py-0.5 ml-2 text-sm font-semibold"
+                <template x-for="(effTypes, eff) in effectivenessesFor('attack')">
+                    <div :key="'effectivenesses-' + eff"
+                        class="mb-4">
+                        <div x-text="eff.toString()"
+                             class="py-1 rounded-t-lg text-center bg-opacity-20"
+                            :class="{'bg-green-500': eff === 'super', 'bg-yellow-500': eff === 'notVery', 'bg-red-500': eff === 'ineffective'}"></div>
+
+                        <div x-show="Object.entries(effTypes).length"
+                            class="px-2 pt-2 rounded-b-lg border border-gray-800">
+                            <template x-for="(value, effType) in effTypes">
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm"
                                   style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                    :class="'bg-' + index"
-                                  x-text="index"></span>
-                        </template>
+                                  :class="'bg-' + effType">
+                                <span x-text="effType" class=""></span>
+                                <span x-text="'×' + value" class="font-normal text-xs text-gray-300"></span>
+                            </div>
+                            </template>
+                        </div>
+
+                        <div x-show="! Object.entries(effTypes).length"
+                                class="p-2 rounded-b-lg border border-gray-800 text-gray-700 text-sm font-semibold">--</div>
                     </div>
-                    <div class="mt-2">
-                        Not Very Effective:
-                        <template x-for="(type, index) in effectivenessFor('attack', selectedType).notVery">
-                            <span class="rounded-md px-2 py-0.5 ml-2 text-sm font-semibold"
-                                  style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                  :class="'bg-' + index"
-                                  x-text="index"></span>
-                        </template>
+                </template>
+
+                <div class="mb-4">
+                    <div class="py-1 rounded-t-lg text-center bg-blue-500 bg-opacity-50">
+                        Recommendation for defense
                     </div>
-                    <div class="mt-2">
-                        Resistant:
-                        <template x-for="(type, index) in effectivenessFor('attack', selectedType).no">
-                            <span class="rounded-md px-2 py-0.5 ml-2 text-sm font-semibold"
-                                  style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                  :class="'bg-' + index"
-                                  x-text="index"></span>
-                        </template>
+
+                    <div class="px-2 pt-2 rounded-b-lg border border-gray-800">
+                        --
                     </div>
                 </div>
             </div>
-
-            <div>
-                <h2 class="font-bold text-center">Defense</h2>
-            </div>
         </div>
 
-        <div x-data="{ expanded: false }" class="max-w-6xl mx-auto w-full mt-8">
+        <div x-data="{ expanded: true }" class="max-w-6xl min-w-6xl mx-auto w-full mt-8">
             <button @click="expanded = ! expanded" class="text-gray-500">Toggle Table</button>
 
             <div x-show="expanded" x-collapse>
-                <div>
+                <div class="overflow-auto mb-16">
                     <table class="table-fixed w-full text-xs mt-4">
                         <thead>
                         <tr>
-                            <th></th>
+                            <th class="w-16 md:w-12"></th>
                             <template x-for="(type, index) in types" :key="'types-table-header-' + index">
                                 <th x-text="index"
-                                    class="px-2 py-2 capitalize text-ellipsis overflow-hidden text-center"
+                                    class="w-16 md:w-12 px-2 py-2 capitalize text-ellipsis overflow-hidden text-center"
                                     style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                                     :class="'bg-' + index"></th>
                             </template>
@@ -199,7 +241,7 @@ x-init="loadTypes()">
                         <template x-for="(type, index) in types" :key="'types-table-' + index">
                             <tr class="group">
                                 <td x-text="index"
-                                    class="px-2 py-2 capitalize text-ellipsis overflow-hidden group-hover:bg-gray-700"
+                                    class="px-2 py-2 capitalize font-bold text-ellipsis overflow-hidden group-hover:bg-gray-900"
                                     style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                                     :class="'bg-' + index"></td>
                                 <template x-for="(defType, defIndex) in types" :key="'types-table-' + defIndex">
@@ -209,9 +251,12 @@ x-init="loadTypes()">
 
                                         <span x-show="effectiveness !== 1"
                                               class="w-full h-full px-2 py-2 block bg-opacity-20"
-                                              :class="{'bg-red-500': effectiveness === 0, 'bg-yellow-500': effectiveness === 0.5, 'bg-green-500': effectiveness > 1}"
-                                              x-text="effectiveness"
+                                              :class="{'bg-red-500': effectiveness === 0.39, 'bg-yellow-500': effectiveness === 0.63, 'bg-green-500': effectiveness > 1}"
+                                              x-text="effectiveness.toString().slice(0, 1) === '0' ? effectiveness.toString().slice(1) : effectiveness"
                                         ></span>
+
+<!--                                        <span x-show="effectiveness === 1"-->
+<!--                                              class="w-full h-full px-2 py-2 block bg-opacity-20 text-gray-700">1</span>-->
                                     </td>
                                 </template>
                             </tr>
