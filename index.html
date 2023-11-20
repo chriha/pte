@@ -127,8 +127,6 @@
 
         let effectivenesses = Object.filter(this.types, ([k, v]) => this.selectedTypes.includes(k))
 
-        console.log(effectivenesses)
-
         let list = {};
 
         for (const [key, value] of Object.entries(effectivenesses)) {
@@ -138,7 +136,7 @@
                 if (list[k] === undefined) {
                     list[k] = v;
                 } else {
-                    list[k] = Number(list[k] * v).toFixed(2);
+                    list[k] = Number(Number(list[k] * v).toFixed(2));
                 }
             }
         }
@@ -161,6 +159,66 @@
             super: _super
         }
     },
+
+    recommendationsForDefense() {
+        if (! this.selectedTypes.length || ! this.exists(this.selectedTypes)) {
+            return []
+        }
+
+        let effectivenesses = Object.filter(this.types, ([k, v]) => this.selectedTypes.includes(k))
+
+        let list = {};
+
+        for (const [key, value] of Object.entries(effectivenesses)) {
+            for (const [k, v] of Object.entries(value)) {
+                let multiplier = 1;
+
+                if (list[k] === undefined) {
+                    list[k] = v;
+                } else {
+                    list[k] = Number(Number(list[k] * v).toFixed(2));
+                }
+            }
+        }
+
+        let types = [];
+
+        for (const [key, value] of Object.entries(list)) {
+            let attackObj = Object.filter(this.types[key], ([k, v]) => this.selectedTypes.includes(k));
+            let weightAttack = 2;
+            let weightDefense = 1;
+
+            let object = {
+                type: key,
+                defense: value,
+                //attack: Number(Number(Object.values(attackObj).reduce((acc, val) => acc * val, 1)).toFixed(2))
+                attack: Number(Number(Object.values(attackObj).reduce((acc, val) => acc * val, 1)).toFixed(2))
+            };
+
+            //object.combined = Number(Number(object.defense * object.attack).toFixed(2));
+            let combined = (weightAttack * Math.sqrt(object.attack)) - (weightDefense / (1 / object.defense));
+
+            object.combined = Number(Number(combined).toFixed(2));
+
+            types.push(object);
+        }
+
+        return types.sort((a, b) => b.combined - a.combined).slice(0, 5);
+
+        let sortedTypes = types.sort((a, b) => {
+            if (a.combined !== b.combined) {
+                return b.combined - a.combined;
+            }
+
+            if (a.defense !== b.defense) {
+                return a.defense - b.defense;
+            }
+
+            return b.attack - a.attack;
+        });
+
+        return sortedTypes.slice(0, 5);
+    }
 }"
 x-init="loadTypes()">
 
@@ -210,10 +268,18 @@ x-init="loadTypes()">
                 <div class="mb-4">
                     <div class="py-1 rounded-t-lg text-center bg-blue-500 bg-opacity-50">
                         Recommendation for defense
+                        <span class="font-normal text-xs text-gray-300">defense / attack</span>
                     </div>
 
                     <div class="px-2 pt-2 rounded-b-lg border border-gray-800">
-                        --
+                        <template x-for="obj in recommendationsForDefense()">
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm"
+                                 style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                                 :class="'bg-' + obj.type">
+                                <span x-text="obj.type" class=""></span>
+                                <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xs text-gray-300"></span>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
