@@ -298,18 +298,24 @@ x-init="loadTypes()">
             </div>
 
             <div x-show="typeof selectedPokemon === 'object' && Object.keys(selectedPokemon).length > 0"
-                 class="px-8 pt-3 pb-1 ring-1 rounded mt-8 ring-blue-700 relative">
-                <div class="text-sm text-gray-500">
-                    <span x-text="selectedPokemon.name" class="text-lg mb-2 mr-2 uppercase text-gray-200"></span>
-                    <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
+                 class="p-3 ring-1 rounded mt-8 ring-blue-900 relative">
+                <div class="text-sm text-gray-500 flex">
+                    <div class="flex-none items-center flex block h-16 w-16 mr-2">
+                        <img x-show="Object.keys(selectedPokemon.images).length && selectedPokemon.images.sprite"
+                             :src="selectedPokemon.images.thumbnail" class="w-full h-full">
+                    </div>
+                    <div>
+                        <div x-text="selectedPokemon.name" class="text-lg mb-2 mr-2 uppercase text-gray-200"></div>
+                        <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
                         <span x-text="type" :class="'bg-' + type"
                               style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                               class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
-                    </template>
-                    <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
+                        </template>
+                        <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
                         <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                               class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
-                    </template>
+                        </template>
+                    </div>
                 </div>
 
                 <div class="absolute top-2.5 right-2.5 rounded p-0.5 bg-gray-700 text-gray-100 cursor-pointer" @click="deselectPokemon()">
