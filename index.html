@@ -91,6 +91,10 @@
     types: {},
     selectedType: 'bug',
     selectedTypes: ['bug', 'dark'],
+    timeout: null,
+    query: '',
+    results: [],
+    selectedPokemon: {},
 
     selectType(type) {
         if (this.selectedTypes.includes(type)) {
@@ -102,6 +106,45 @@
 
             this.selectedTypes.push(type)
         }
+    },
+
+    updateSearchResults() {
+        if (this.query.length <= 3) {
+            return;
+        }
+
+        fetch('assets/pokemon.json')
+            .then(response => {
+                // Check response is ok
+                if(!response.ok) {
+                    throw new Error('Network error')
+                }
+
+                // Parse JSON
+                return response.json();
+            })
+            .then(data => {
+                //console.log(data[0], this.query);
+
+                let self = this;
+
+                this.results = data.filter(function (p) {
+                    return p.name.toLowerCase().search(self.query.toLowerCase()) !== -1;
+                    //return p.name.toLowerCase().startsWith(self.query.toLowerCase());
+                }).slice(0, 10);
+
+                //console.table(this.results);
+            })
+            .catch(error => {
+                console.error('Error loading JSON', error);
+            });
+    },
+
+    selectPokemon(id) {
+        this.selectedPokemon = this.results.filter(p => p.id === id)[0];
+        this.selectedTypes = this.selectedPokemon.types;
+        this.query = '';
+        this.results = [];
     },
 
     async loadTypes() {
@@ -132,8 +175,6 @@
 
         for (const [key, value] of Object.entries(effectivenesses)) {
             for (const [k, v] of Object.entries(value)) {
-                let multiplier = 1;
-
                 if (list[k] === undefined) {
                     list[k] = v;
                 } else {
@@ -226,7 +267,41 @@ x-init="loadTypes()">
     <div class="p-4 flex flex-col">
         <h1 class="font-bold mb-8 text-2xl text-center text-white">Pokémon Type Effectiveness</h1>
 
-        <div class="max-w-2xl md:max-w-4xl mx-auto grid grid-cols-4 lg:grid-cols-9 gap-4">
+        <div class="max-w-2xl md:max-w-4xl mt-8 mx-auto w-full">
+            <div>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 border-gray-700"
+                       placeholder="Search Pokémon" type="text" x-model="query"
+                       @input.debounce.500ms="updateSearchResults()">
+            </div>
+
+            <div x-if="results.length">
+                <ul class="mt-0.5 bg-gray-800 rounded-b divide-y divide-dashed divide-gray-600">
+                    <template x-for="(result, index) in results" :key="'results-' + index" hidden>
+                        <li x-text="result.name" @click="selectPokemon(result.id)"
+                            class="text-gray-600 px-3 py-2 hover:bg-gray-700 hover:text-gray-400 hover:cursor-pointer divide-y"></li>
+                    </template>
+                </ul>
+            </div>
+
+            <div x-if="Object.keys(selectedPokemon).length" class="p-3 ring-1 rounded mt-8 ring-blue700">
+                <div x-text="selectedPokemon.name" class="text-lg mb-2 uppercase text-gray-200"></div>
+                <div class="text-sm text-gray-500">
+                    <span>Types</span>
+                    <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
+                        <span x-text="type" :class="'bg-' + type"
+                              style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                              class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
+                    </template>
+                    <span class="font-semibold">Abilities</span>
+                    <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
+                        <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                              class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-2xl md:max-w-4xl mx-auto mt-8 grid grid-cols-4 lg:grid-cols-9 gap-4">
             <template x-for="(type, index) in types" :key="'types-' + index">
                 <div class="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 opacity-80 cursor-pointer relative"
                      :class="{'bg-gray-700 ring-1 ring-blue-500 opacity-100': selectedTypes.includes(index)}"
