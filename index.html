@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script type="text/javascript">
@@ -12,6 +15,11 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        .font-mono-special {
+            /*font-family: 'Anonymous Pro', monospace;*/
+            font-family: 'VT323', monospace;
+        }
+
         .bg-bug {
             background-color: #779f2f;
         }
@@ -308,27 +316,29 @@ x-init="loadTypes()">
                     </div>
                     <div>
                         <div class="mb-2">
-                            <span x-text="selectedPokemon.name" class="text-xl mb-2 mr-2 uppercase text-gray-200"></span>
+                            <span x-text="selectedPokemon.name"
+                                  style="text-shadow: 0 0 8px #0080ff;"
+                                  class="text-xl mb-2 mr-2 uppercase text-gray-200 font-mono"></span>
                             <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
                                 <span x-text="type" :class="'bg-' + type"
                                       style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                      class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 last:mr-0 text-xs text-white align-text-bottom"></span>
+                                      class="inline-block rounded-md px-2 py-0.5 mr-2 last:mr-0 align-text-bottom font-semibold text-xs text-white font-mono"></span>
                             </template>
                         </div>
                         <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
-                        <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                              class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 last:mr-0 text-sm text-white"></span>
+                            <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                                  class="bg-gray-800 inline-block rounded-md px-2 py-0.5 mr-2 last:mr-0 text-xs text-white font-mono"></span>
                         </template>
                     </div>
                 </div>
 
-                <div class="bg-gray-950 bg-opacity-50 -mx-3 mt-3 -mb-3 rounded-b p-3 flex gap-2">
+                <div class="bg-gray-950 bg-opacity-50 -mx-3 mt-3 -mb-3 rounded-b p-3 flex gap-2 flex-wrap">
                     <template x-for="obj in recommendationsForDefense()">
-                        <div class="inline-block rounded-md font-semibold px-2 py-0.5 text-sm"
+                        <div class="inline-block rounded-md font-semibold px-2 py-0.5 font-semibold text-xs text-white font-mono"
                              style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                              :class="'bg-' + obj.type">
                             <span x-text="obj.type" class=""></span>
-                            <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xs text-gray-300"></span>
+                            <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xxs text-gray-200"></span>
                         </div>
                     </template>
                 </div>
@@ -348,9 +358,8 @@ x-init="loadTypes()">
                      x-tooltip="index"
                     @click="selectType(index)">
                     <img :src="'assets/images/types/' + index + '.png'">
-                    <span x-text="index" :class="'bg-' + index"
-                          style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                          class="absolute pb-0.5 block bottom-0 font-semibold left-0 mt-2 mx-auto rounded-b-lg text-center text-sm w-full"></span>
+                    <span x-text="index" :class="'bg-' + index" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                          class="absolute py-0.5 block bottom-0 font-semibold left-0 mt-2 mx-auto rounded-b-lg text-center text-xs text-white font-mono w-full"></span>
                 </div>
             </template>
         </div>
@@ -365,19 +374,18 @@ x-init="loadTypes()">
                             :class="{'bg-green-500': eff === 'super', 'bg-yellow-500': eff === 'notVery', 'bg-red-500': eff === 'ineffective'}"></div>
 
                         <div x-show="Object.entries(effTypes).length"
-                            class="p-2 rounded-b-lg border border-gray-800 flex gap-2">
+                            class="p-2 rounded-b-lg border border-gray-800 flex flex-wrap gap-2">
                             <template x-for="(value, effType) in effTypes">
-                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 text-sm"
-                                  style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                  :class="'bg-' + effType">
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 text-xs text-white font-mono"
+                                  style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);" :class="'bg-' + effType">
                                 <span x-text="effType" class=""></span>
-                                <span x-text="'×' + value" class="font-normal text-xs text-gray-300"></span>
+                                <span x-text="'×' + value" class="font-normal text-xxs text-gray-200"></span>
                             </div>
                             </template>
                         </div>
 
                         <div x-show="! Object.entries(effTypes).length"
-                                class="p-2 rounded-b-lg border border-gray-800 text-gray-700 text-sm font-semibold">--</div>
+                                class="p-2 rounded-b-lg border border-gray-800 text-gray-700 text-xs font-mono font-semibold">--</div>
                     </div>
                 </template>
 
@@ -387,13 +395,12 @@ x-init="loadTypes()">
                         <span class="block md:inline-block font-normal text-xs text-gray-300">opponent / you</span>
                     </div>
 
-                    <div class="p-2 rounded-b-lg border border-gray-800 flex gap-2">
+                    <div class="p-2 rounded-b-lg border border-gray-800 flex flex-wrap gap-2">
                         <template x-for="obj in recommendationsForDefense()">
-                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 last:mr-0 text-sm"
-                                 style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                 :class="'bg-' + obj.type">
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 last:mr-0 text-xs text-white font-mono"
+                                 style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);" :class="'bg-' + obj.type">
                                 <span x-text="obj.type" class=""></span>
-                                <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xs text-gray-300"></span>
+                                <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xxs text-gray-200"></span>
                             </div>
                         </template>
                     </div>
@@ -423,15 +430,14 @@ x-init="loadTypes()">
                         <tr class="group">
                             <td x-text="index"
                                 class="px-2 py-2 capitalize font-bold text-ellipsis overflow-hidden group-hover:bg-gray-900"
-                                style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                                :class="'bg-' + index"></td>
+                                style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);" :class="'bg-' + index"></td>
                             <template x-for="(defType, defIndex) in types" :key="'types-table-' + defIndex">
                                 <td x-data="{ effectiveness: effectivenessOf(index, defIndex) }"
                                     class="group-hover:bg-gray-700 font-bold text-center"
                                     style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);">
 
                                     <span x-show="effectiveness !== 1"
-                                          class="w-full h-full px-2 py-2 block bg-opacity-20"
+                                          class="w-full h-full px-2 py-2 block bg-opacity-20 text-xs text-white font-mono"
                                           :class="{'bg-red-500': effectiveness === 0.39, 'bg-yellow-500': effectiveness === 0.63, 'bg-green-500': effectiveness > 1}"
                                           x-text="effectiveness.toString().slice(0, 1) === '0' ? effectiveness.toString().slice(1) : effectiveness"
                                     ></span>
