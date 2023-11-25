@@ -147,6 +147,11 @@
         this.results = [];
     },
 
+    deselectPokemon() {
+        this.selectedPokemon = {};
+        this.selectedTypes = [];
+    },
+
     async loadTypes() {
         const response = await fetch('assets/types.json')
         this.types = await response.json()
@@ -274,29 +279,34 @@ x-init="loadTypes()">
                        @input.debounce.500ms="updateSearchResults()">
             </div>
 
-            <div x-if="results.length">
+            <div x-show="results.length">
                 <ul class="mt-0.5 bg-gray-800 rounded-b divide-y divide-dashed divide-gray-600">
                     <template x-for="(result, index) in results" :key="'results-' + index" hidden>
-                        <li x-text="result.name" @click="selectPokemon(result.id)"
+                        <li x-text="result.name.charAt(0).toUpperCase() + result.name.slice(1)" @click="selectPokemon(result.id)"
                             class="text-gray-600 px-3 py-2 hover:bg-gray-700 hover:text-gray-400 hover:cursor-pointer divide-y"></li>
                     </template>
                 </ul>
             </div>
 
-            <div x-if="Object.keys(selectedPokemon).length" class="p-3 ring-1 rounded mt-8 ring-blue700">
-                <div x-text="selectedPokemon.name" class="text-lg mb-2 uppercase text-gray-200"></div>
+            <div x-show="typeof selectedPokemon === 'object' && Object.keys(selectedPokemon).length > 0"
+                 class="px-8 pt-3 pb-1 text-center ring-1 rounded mt-8 ring-blue-700 relative">
                 <div class="text-sm text-gray-500">
-                    <span>Types</span>
+                    <span x-text="selectedPokemon.name" class="text-lg mb-2 mr-2 uppercase text-gray-200"></span>
                     <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
                         <span x-text="type" :class="'bg-' + type"
                               style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                               class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
                     </template>
-                    <span class="font-semibold">Abilities</span>
                     <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
                         <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                               class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
                     </template>
+                </div>
+
+                <div class="absolute top-2.5 right-2.5 rounded p-0.5 bg-gray-700 text-gray-100 cursor-pointer" @click="deselectPokemon()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </div>
             </div>
         </div>
