@@ -286,7 +286,8 @@ x-init="loadTypes()">
                             class="text-gray-600 px-3 py-2 hover:bg-gray-700 hover:text-gray-400 hover:cursor-pointer divide-y">
                             <div class="flex">
                                 <span class="flex-none items-center flex block w-6 h-6 mr-2">
-                                    <img :src="result.images['sprite']" class="object-none object-center w-10 h-10">
+                                    <img x-show="Object.keys(result.images).length && result.images.sprite"
+                                         :src="result.images.sprite" class="object-none object-center w-10 h-10">
                                 </span>
                                 <span x-text="result.name.charAt(0).toUpperCase() + result.name.slice(1)"
                                       class="flex-1"></span>
@@ -297,7 +298,7 @@ x-init="loadTypes()">
             </div>
 
             <div x-show="typeof selectedPokemon === 'object' && Object.keys(selectedPokemon).length > 0"
-                 class="px-8 pt-3 pb-1 text-center ring-1 rounded mt-8 ring-blue-700 relative">
+                 class="px-8 pt-3 pb-1 ring-1 rounded mt-8 ring-blue-700 relative">
                 <div class="text-sm text-gray-500">
                     <span x-text="selectedPokemon.name" class="text-lg mb-2 mr-2 uppercase text-gray-200"></span>
                     <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
