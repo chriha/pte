@@ -106,6 +106,8 @@
 
             this.selectedTypes.push(type)
         }
+
+        this.selectedPokemon = {};
     },
 
     updateSearchResults() {
@@ -305,17 +307,30 @@ x-init="loadTypes()">
                              :src="selectedPokemon.images.thumbnail" class="w-full h-full">
                     </div>
                     <div>
-                        <div x-text="selectedPokemon.name" class="text-lg mb-2 mr-2 uppercase text-gray-200"></div>
-                        <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
-                        <span x-text="type" :class="'bg-' + type"
-                              style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                              class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
-                        </template>
+                        <div class="mb-2">
+                            <span x-text="selectedPokemon.name" class="text-xl mb-2 mr-2 uppercase text-gray-200"></span>
+                            <template x-for="(type, index) in selectedPokemon.types" :key="'types-' + index">
+                                <span x-text="type" :class="'bg-' + type"
+                                      style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                                      class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 last:mr-0 text-xs text-white align-text-bottom"></span>
+                            </template>
+                        </div>
                         <template x-for="(ability, index) in selectedPokemon.abilities" :key="'abilities-' + index">
                         <span x-text="ability" style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
-                              class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm text-white"></span>
+                              class="bg-gray-800 inline-block rounded-md font-semibold px-2 py-0.5 mr-2 last:mr-0 text-sm text-white"></span>
                         </template>
                     </div>
+                </div>
+
+                <div class="bg-gray-950 bg-opacity-50 -mx-3 mt-3 -mb-3 rounded-b p-3 flex gap-2">
+                    <template x-for="obj in recommendationsForDefense()">
+                        <div class="inline-block rounded-md font-semibold px-2 py-0.5 text-sm"
+                             style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
+                             :class="'bg-' + obj.type">
+                            <span x-text="obj.type" class=""></span>
+                            <span x-text="'×' + obj.defense + ' / ' + '×' + obj.attack" class="font-normal text-xs text-gray-300"></span>
+                        </div>
+                    </template>
                 </div>
 
                 <div class="absolute top-2.5 right-2.5 rounded p-0.5 bg-gray-700 text-gray-100 cursor-pointer" @click="deselectPokemon()">
@@ -350,9 +365,9 @@ x-init="loadTypes()">
                             :class="{'bg-green-500': eff === 'super', 'bg-yellow-500': eff === 'notVery', 'bg-red-500': eff === 'ineffective'}"></div>
 
                         <div x-show="Object.entries(effTypes).length"
-                            class="px-2 pt-2 rounded-b-lg border border-gray-800">
+                            class="p-2 rounded-b-lg border border-gray-800 flex gap-2">
                             <template x-for="(value, effType) in effTypes">
-                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm"
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 text-sm"
                                   style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                                   :class="'bg-' + effType">
                                 <span x-text="effType" class=""></span>
@@ -372,9 +387,9 @@ x-init="loadTypes()">
                         <span class="block md:inline-block font-normal text-xs text-gray-300">opponent / you</span>
                     </div>
 
-                    <div class="px-2 pt-2 rounded-b-lg border border-gray-800">
+                    <div class="p-2 rounded-b-lg border border-gray-800 flex gap-2">
                         <template x-for="obj in recommendationsForDefense()">
-                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 mr-2 mb-2 last:mr-0 text-sm"
+                            <div class="inline-block rounded-md font-semibold px-2 py-0.5 last:mr-0 text-sm"
                                  style="text-shadow: 0 0 8px rgba(93, 93, 93, 0.75);"
                                  :class="'bg-' + obj.type">
                                 <span x-text="obj.type" class=""></span>
