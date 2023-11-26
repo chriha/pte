@@ -113,7 +113,7 @@
     },
 
     updateSearchResults() {
-        if (this.query.length <= 3) {
+        if (this.query.length < 3) {
             return;
         }
 
@@ -128,16 +128,11 @@
                 return response.json();
             })
             .then(data => {
-                //console.log(data[0], this.query);
-
                 let self = this;
 
                 this.results = data.filter(function (p) {
                     return p.name.toLowerCase().search(self.query.toLowerCase()) !== -1;
-                    //return p.name.toLowerCase().startsWith(self.query.toLowerCase());
                 }).slice(0, 10);
-
-                //console.table(this.results);
             })
             .catch(error => {
                 console.error('Error loading JSON', error);
